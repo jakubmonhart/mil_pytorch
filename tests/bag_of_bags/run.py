@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, SubsetRandomSampler
 from sklearn.datasets import make_classification
 import time
 
-def create_model(input_len, n_neurons1, n_neurons2, n_neurons3):
+def create_model(input_len, n_neurons1, n_neurons2, n_neurons3, device = 'cpu'):
     # Define neural networks for processing of data before and after aggregation
     prepNN1 = torch.nn.Sequential(
         torch.nn.Linear(input_len, n_neurons1, bias = True),
@@ -49,13 +49,13 @@ n_neurons2 = 15
 n_neurons3 = 15
 learning_rate = 1e-4
 weight_decay = 1e-2
-epochs = 4000
-pos = 50
-neg = 50
-class_sep = 1.8
+epochs = 1000
+pos = 1000
+neg = 1000
+class_sep = 1.0
 n_features = 100
-max_subbags = 5
-max_instances = 5
+max_subbags = 100
+max_instances = 100
 batch_size = 0
 patience = 20
 delta = 0
@@ -104,7 +104,7 @@ test_dl = DataLoader(dataset, sampler = test_sampler, batch_size = len(test_indi
 
 # --- MODEL ---
 
-model = create_model(len(dataset.data[0]), n_neurons1, n_neurons2, n_neurons3)
+model = create_model(len(dataset.data[0]), n_neurons1, n_neurons2, n_neurons3, device = device)
 criterion = mil.MyHingeLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate, weight_decay = weight_decay)
 
@@ -115,7 +115,7 @@ model = model.to(device)
 # --- TRAIN ---
 
 # Train model
-train_utils.train_model(model, criterion, optimizer, train_dl, valid_dl, epochs, patience, delta)
+train_utils.train_model(model, criterion, optimizer, train_dl, valid_dl, epochs, patience, delta, device = device)
 
 
 # --- EVAL ---
