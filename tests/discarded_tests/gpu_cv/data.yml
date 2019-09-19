@@ -1,0 +1,7 @@
+config:
+  learning_rate: 0.001
+  n_neurons1: 5
+  n_neurons2: 5
+  n_neurons3: 5
+  weight_decay: 0.0001
+loss: 1.2257565259933472

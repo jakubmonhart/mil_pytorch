@@ -1,0 +1,18 @@
+config:
+  batch_size: 0
+  class_sep: 1.0
+  delta: 0.0002
+  epochs: 4000
+  learning_rate: 0.001
+  max_instances: 5
+  n_features: 10
+  n_neurons1: 5
+  n_neurons2: 5
+  n_neurons3: 5
+  neg: 50
+  patience: 10
+  pos: 50
+  weight_decay: 0.001
+description: ''
+id: 3df30859756640c3b1ec77c9ffe318f5
+loss: 0.967481791973114
