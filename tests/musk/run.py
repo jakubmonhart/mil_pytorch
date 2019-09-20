@@ -54,9 +54,9 @@ print('n_neurons1:\t{}\nn_neurons2:\t{}\nn_neurons3:\t{}\nlearning_rate:\t{}\nwe
 
 import pandas
 
-data = pandas.read_csv(filepath_or_buffer = dir_path + 'Musk2/data.csv', sep = '\t', header = None).values
-ids = pandas.read_csv(filepath_or_buffer = dir_path + 'Musk2/bagids.csv', sep = '\t', header = None).values.reshape(-1)
-instance_labels = pandas.read_csv(filepath_or_buffer = dir_path + 'Musk2/labels.csv', sep = '\t', header = None).values.reshape(-1)
+data = pandas.read_csv(filepath_or_buffer = dir_path + 'Musk1/data.csv', sep = '\t', header = None).values
+ids = pandas.read_csv(filepath_or_buffer = dir_path + 'Musk1/bagids.csv', sep = '\t', header = None).values.reshape(-1)
+instance_labels = pandas.read_csv(filepath_or_buffer = dir_path + 'Musk1/labels.csv', sep = '\t', header = None).values.reshape(-1)
 data = torch.Tensor(data).double().t()
 ids = torch.Tensor(ids).long()
 instance_labels = torch.Tensor(instance_labels).long()
