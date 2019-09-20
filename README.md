@@ -32,5 +32,5 @@ To use torch.utils.data.DataLoader (https://pytorch.org/docs/stable/data.html#to
 from torch.utils.data import DataLoader
 import mil_pytorch.mil as mil
 
-dataloader = DataLoader(dataset = dataset, batch_size = batch_size, collate_fn = mil.collate_fn)
+dataloader = DataLoader(dataset = dataset, batch_size = batch_size, collate_fn = mil.collate)
 ```
