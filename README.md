@@ -12,32 +12,41 @@ For description of multiple instance learning problem see https://github.com/pev
 
 ## Usage
 ### Data
-Each instance is feature vector with fixed lenght. A bag contains variable number of these instances. Each instance has an id specifying, which bag does it belong to (number of instances is then same as lenght of ids vector).
-Initialize MilDataset passing it instances, ids and labels of bags ([1,-1] - [positive/negative]).
+Each instance is feature vector with fixed lenght. A bag contains variable number of these instances. Each instance has an id specifying, which bag does it belong to. Ids of instances are stored in vector with length equal to number of instances.
+
+Initialize MilDataset passing it instances, ids and labels of bags.
 
 ```python
-dataset = MilDataset(instances, ids, labels)
+import torch
+import mil_pytorch.mil as mil
+
+# Create 4 instances divided to 2 bags in 3:1 ratio. First bag has positive label, second bag has negative label
+instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
+				   		  [2.0, 2.0, 2.0, 2.0],
+						  [3.0, 3.0, 3.0, 3.0],
+						  [4.0, 4.0, 4.0, 4.0]], dtype = torch.double)
+ids = torch.tensor([0, 0, 0, 1], dtype = torch.long)
+labels = torch.tensor([1, -1], dtype = torch.long)
+
+# Initialize MilDataset using created data
+dataset = mil.MilDataset(instances, ids, labels)
 ```
 
-You can access bags from this dataset by using index:  
+You can access bags from this dataset using index ...  
 
 ```python
 instances, ids, label = dataset[index]
 ```
 
-Or by iteration:
+... or iteration.
 
 ```python
 for instances, ids, bag in dataset:
   ...
 ```
 
-<<<<<<< HEAD
-To use torch.utils.data.DataLoader (https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader) you need to use custom collate function.
-
-=======
 To use **torch.utils.data.DataLoader** (https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader) you need to use custom collate function.
->>>>>>> d45f77d016894a3984c5806222fd22f57b2b960a
+
 ```python
 from torch.utils.data import DataLoader
 import mil_pytorch.mil as mil
@@ -47,37 +56,66 @@ dataloader = DataLoader(dataset = dataset, batch_size = batch_size, collate_fn =
 
 ### Creating model
 BagModel consists of user defined non-linear neural networks prepNN and afterNN and an aggregation function stacked between them.  
-prepNN preserves number of feature vectors (instances) in input, aggregation function aggregates instances of each bag creating one feature vector for each bag. afterNN simply processes this output.
+PrepNN preserves number of feature vectors (instances) in input, aggregation function aggregates instances of each bag creating one feature vector per bag. This output is then forwarded through afterNN.
 
 ```python
-# Define custom prepNN as single layer nn
+# Define custom prepNN
 prepNN = torch.nn.Sequential(
         torch.nn.Linear(input_len, 10, bias = True),
         torch.nn.ReLU(),
     )
    
-# Define custom afterNN as single layer nn
+# Define custom afterNN
 afterNN = torch.nn.Sequential(
         torch.nn.Linear(10, 1, bias = True),
         torch.nn.Tanh(),
     )
 
-# Define model with prepNN, afterNN and torch.mean
+# Define model with prepNN, afterNN and torch.mean as aggregation function
 model = mil.BagModel(prepNN, afterNN, torch.mean)
 ```
 
-Data for MIL problem can also be in the form of "bag of bags", where each bag consists of variable number of lower bags, which consists of variable number of instances. In this case ids is a matrix with number of columns equal to number of instances and number of rows equal to number of "bag-layers". Number of rows is 1 for "bag of instances" problem, 2 for "bag of bags" problem and so on.  
-In the case of "bag of bags" problem, the neural network is created as sequence of two BagModels.
+### Bag of bags
+
+Data for MIL problem can also be in the form of "bag of bags", where each bag consists of variable number of lower bags, which consists of variable number of instances. In this case ids is a matrix with number of columns equal to number of instances and number of rows equal to number of "bag-layers". For example number of rows is 1 for "bag of instances" problem, 2 for "bag of bags" problem and so on.
+
+Data for bag of bags problem would look like this:
+
 ```python
-# Define custom prepNN as single layer nn
+import torch
+import mil_pytorch.mil as mil
+
+# Create 8 instances divided to 4 lower-bags in 1:3:2:2 ratio. Lower-bags are divided into 2 bags in ratio 2:2 First bag has positive label, second bag has negative label
+instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
+						  [2.0, 2.0, 2.0, 2.0],
+						  [3.0, 3.0, 3.0, 3.0],
+						  [4.0, 4.0, 4.0, 4.0],
+						  [5.0, 5.0, 5.0, 5.0],
+						  [6.0, 6.0, 6.0, 6.0],
+						  [7.0, 7.0, 7.0, 7.0],
+						  [8.0, 8.0, 8.0, 8.0]], dtype = torch.double)
+						  
+ids = torch.tensor([[0, 0, 0, 0, 1, 1, 1, 1],
+					[0, 1, 1, 1, 2, 2, 3, 3]], dtype = torch.long)
+					
+labels = torch.tensor([1, -1], dtype = torch.long)
+
+# Initialize MilDataset using created data
+dataset = mil.MilDataset(instances, ids, labels)
+```
+
+
+In the case of "bag of bags" problem, the neural network is created as sequence of two BagModels.
+
+```python
+# Define prepNNs and afterNNs
 prepNN1 = torch.nn.Sequential(
         torch.nn.Linear(input_len, 10, bias = True),
         torch.nn.ReLU(),
     )
    
-# Define custom afterNN as single layer nn
-afterNN1 = torch.nn.Sequential(
-        torch.identity()
+afterNN1 = torch.nn.Sequential( 
+        torch.identity() # In this case afterNN1 and prepNN2 are interchangeable
     )
 
 prepNN2 = torch.nn.Sequential(
@@ -90,14 +128,16 @@ afterNN2 = torch.nn.Sequential(
         torch.nn.Tanh()
     )
 
-# Define model with prepNN, afterNN and torch.mean
+# Define model with prepNN, afterNN and torch.mean as aggregation function
 model = torch.nn.Sequential(
         mil.BagModel(prepNN1, afterNN1, torch.mean),
         mil.BagModel(prepNN2, afterNN2, torch.mean)
     )
 ```
+### Warning
 
-Neural network created using this library has to consists only of instances of BagModel, it is not possible to combine mil.BagModel with other torch.nn modules due to correct pass of information about ids, but preNN and afterNN neural networks can be of arbitrary form as long as the length of output from prepNN matches the length of input of afterNN.
+Neural network created using this library has to consists only of instances of BagModel. It is not possible to combine **mil.BagModel** with other **torch.nn** modules due to correct pass of information about ids. However, preNN and afterNN neural networks can be of arbitrary form as long as the length of output of prepNN matches the length of input of afterNN.
+
 ```python
 # --- WRONG ---
 model = torch.nn.Sequential(
