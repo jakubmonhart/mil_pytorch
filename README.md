@@ -152,4 +152,8 @@ model = torch.nn.Sequential(
 ```
 
 ## Examples
-Training simple nn using mil.BagModel on Musk1 and Musk2 data.
+[musk1](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/musk1.ipynb)
+
+[musk2](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/musk2.ipynb)
+
+[bag\_of\_bags](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/bag_of_bags/bag_of_bags.ipynb)
