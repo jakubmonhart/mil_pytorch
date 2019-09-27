@@ -45,7 +45,7 @@ for instances, ids, bag in dataset:
   ...
 ```
 
-To use **torch.utils.data.DataLoader** (https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader) you need to use custom collate function.
+To use **torch.utils.data.DataLoader** (https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader) you need to use custom collate function **mil.collate**.
 
 ```python
 from torch.utils.data import DataLoader
@@ -79,6 +79,8 @@ model = mil.BagModel(prepNN, afterNN, torch.mean)
 
 Data for MIL problem can also be in the form of "bag of bags", where each bag consists of variable number of lower bags, which consists of variable number of instances. In this case ids is a matrix with number of columns equal to number of instances and number of rows equal to number of "bag-layers". For example number of rows is 1 for "bag of instances" problem, 2 for "bag of bags" problem and so on.
 
+Matrix of ids is sorted in such a way, that last row specifies ids of instances, the row above specifies ids of sub-bags and so on to top.
+
 Data for bag of bags problem would look like this:
 
 ```python
@@ -103,6 +105,7 @@ labels = torch.tensor([1, -1], dtype = torch.long)
 # Initialize MilDataset using created data
 dataset = mil.MilDataset(instances, ids, labels)
 ```
+
 
 
 In the case of "bag of bags" problem, the neural network is created as sequence of two BagModels.
@@ -147,3 +150,6 @@ model = torch.nn.Sequential(
      )
 # --- WRONG ---
 ```
+
+## Examples
+Training simple nn using mil.BagModel on Musk1 and Musk2 data.
