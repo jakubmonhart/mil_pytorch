@@ -63,10 +63,10 @@ labels_df.to_csv('musk2/labels.csv', header = None, index = False)
 #######################
 # --- BAG-OF-BAGS ----#
 #######################
-pos = 50
-neg = 50
+pos = 40
+neg = 40
 n_features = 20
-class_sep = 1.0
+class_sep = 1.5
 max_subbags = 7
 max_instances = 7
 
