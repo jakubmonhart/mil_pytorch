@@ -152,8 +152,12 @@ model = torch.nn.Sequential(
 ```
 
 ## Examples
-[musk1](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/musk1.ipynb)
+[musk1](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk1.ipynb)
 
-[musk2](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/musk2.ipynb)
+[musk2](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk2.ipynb)
 
-[bag\_of\_bags](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/bag_of_bags/bag_of_bags.ipynb)
+[musk1 with 3d data representation](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk1_3d.ipynb)
+
+[musk2 with 3d data representation](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk2_3d.ipynb)
+
+[bag\_of\_bags](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/bag_of_bags/example_bag_of_bags.ipynb)
