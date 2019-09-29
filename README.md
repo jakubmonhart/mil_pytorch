@@ -137,6 +137,10 @@ model = torch.nn.Sequential(
         mil.BagModel(prepNN2, afterNN2, torch.mean)
     )
 ```
+
+### 3d data representation
+If using data in form of bag of instances (the simplest case), it's possible to use **mil.BagModel_3d** and **mil.MilDataset_3d** instead of the ones used above. In some cases, this can lead to speed up of forward function of the model. This method is however more memory consuming, especially, if the variability of number of instances in bags is high.
+
 ### Warning
 
 Neural network created using this library has to consists only of instances of BagModel. It is not possible to combine **mil.BagModel** with other **torch.nn** modules due to correct pass of information about ids. However, preNN and afterNN neural networks can be of arbitrary form as long as the length of output of prepNN matches the length of input of afterNN.
