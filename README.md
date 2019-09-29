@@ -139,7 +139,7 @@ model = torch.nn.Sequential(
 ```
 
 ### 3d data representation
-If using data in form of bag of instances (the simplest case), it's possible to use **mil.BagModel_3d** and **mil.MilDataset_3d** instead of the ones used above. In some cases, this can lead to speed up of forward function of the model. This method is however more memory consuming, especially, if the variability of number of instances in bags is high.
+If using data in form of bag of instances (the simplest case), it's possible to use **mil.BagModel_3d** and **mil.MilDataset_3d** instead of the ones used above. In some cases, this can lead to speed up of forward function of the model. This method is however more memory consuming, especially, if the variability of number of instances in bags is high. If using this method, there is no need to use custom collate function for creating dataloaders due to different type of data representation.
 
 ### Warning
 
