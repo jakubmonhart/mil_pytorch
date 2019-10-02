@@ -6,3 +6,8 @@
 
 # pyc extension
 **/*.pyc
+
+# setup files
+build/
+dist/
+*.egg-info/
