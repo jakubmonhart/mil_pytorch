@@ -22,9 +22,9 @@ import mil_pytorch.mil as mil
 
 # Create 4 instances divided to 2 bags in 3:1 ratio. First bag has positive label, second bag has negative label
 instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
-				   		  [2.0, 2.0, 2.0, 2.0],
-						  [3.0, 3.0, 3.0, 3.0],
-						  [4.0, 4.0, 4.0, 4.0]], dtype = torch.double)
+			  [2.0, 2.0, 2.0, 2.0],
+			  [3.0, 3.0, 3.0, 3.0],
+			  [4.0, 4.0, 4.0, 4.0]], dtype = torch.double)
 ids = torch.tensor([0, 0, 0, 1], dtype = torch.long)
 labels = torch.tensor([1, -1], dtype = torch.long)
 
@@ -89,16 +89,16 @@ import mil_pytorch.mil as mil
 
 # Create 8 instances divided to 4 lower-bags in 1:3:2:2 ratio. Lower-bags are divided into 2 bags in ratio 2:2 First bag has positive label, second bag has negative label
 instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
-						  [2.0, 2.0, 2.0, 2.0],
-						  [3.0, 3.0, 3.0, 3.0],
-						  [4.0, 4.0, 4.0, 4.0],
-						  [5.0, 5.0, 5.0, 5.0],
-						  [6.0, 6.0, 6.0, 6.0],
-						  [7.0, 7.0, 7.0, 7.0],
-						  [8.0, 8.0, 8.0, 8.0]], dtype = torch.double)
+			  [2.0, 2.0, 2.0, 2.0],
+			  [3.0, 3.0, 3.0, 3.0],
+			  [4.0, 4.0, 4.0, 4.0],
+			  [5.0, 5.0, 5.0, 5.0],
+			  [6.0, 6.0, 6.0, 6.0],
+			  [7.0, 7.0, 7.0, 7.0],
+			  [8.0, 8.0, 8.0, 8.0]], dtype = torch.double)
 						  
 ids = torch.tensor([[0, 0, 0, 0, 1, 1, 1, 1],
-					[0, 1, 1, 1, 2, 2, 3, 3]], dtype = torch.long)
+		    [0, 1, 1, 1, 2, 2, 3, 3]], dtype = torch.long)
 					
 labels = torch.tensor([1, -1], dtype = torch.long)
 
@@ -139,7 +139,7 @@ model = torch.nn.Sequential(
 ```
 
 ### 3d data representation
-If using data in form of bag of instances (the simplest case), it's possible to use **mil.BagModel_3d** and **mil.MilDataset_3d** instead of the ones used above. In some cases, this can lead to speed up of forward function of the model. This method is however more memory consuming, especially, if the variability of number of instances in bags is high. If using this method, there is no need to use custom collate function for creating dataloaders due to different type of data representation.
+If using data in form of "bag of instances" (the simplest case), it's possible to use **mil.BagModel_3d** and **mil.MilDataset_3d** instead of the ones used above. In some cases, this can lead to speed up of forward function of the model. This method is however more memory consuming, especially, if the variability of number of instances in bags is high. If using this method, there is no need to use custom collate function for creating dataloaders due to different type of data representation.
 
 ### Warning
 
