@@ -1,20 +1,27 @@
 # mil_pytorch - multiple instance learning model implemented in pytorch
-This library consists mainly of BagModel and MilDataset
+This library consists mainly of **mil_pytorch.mil.BagModel** and **mil_pytorch.mil.MilDataset**
 
 ```python
 from mil_pytorch.mil import BagModel, MilDataset
 ```
 
-BagModel is subclass of **torch.nn.Module** (see https://pytorch.org/docs/stable/nn.html#torch.nn.Module).  
-MilDataset is subclass of **torch.utils.data.dataset** (see https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset).  
+**BagModel** is subclass of **torch.nn.Module** (see https://pytorch.org/docs/stable/nn.html#torch.nn.Module).  
+**MilDataset** is subclass of **torch.utils.data.dataset** (see https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset).  
 
 For description of multiple instance learning problem see https://github.com/pevnak/Mill.jl#what-is-multiple-instance-learning-mil-problem.
 
+## Install
+Clone this repository. Inside it, use:
+
+```python
+python setup.py install
+```
+
 ## Usage
 ### Data
-Each instance is feature vector with fixed lenght. A bag contains variable number of these instances. Each instance has an id specifying, which bag does it belong to. Ids of instances are stored in vector with length equal to number of instances.
+Each instance is feature vector with fixed length. A bag contains variable number of these instances. Each instance has an id specifying, which bag does it belong to. Ids of instances are stored in vector with length equal to number of instances.
 
-Initialize MilDataset passing it instances, ids and labels of bags.
+Create an instance of MilDataset by passing it instances, ids and labels of bags.
 
 ```python
 import torch
@@ -74,6 +81,16 @@ afterNN = torch.nn.Sequential(
 # Define model with prepNN, afterNN and torch.mean as aggregation function
 model = mil.BagModel(prepNN, afterNN, torch.mean)
 ```
+
+### Form of input
+Input for model must be a tuple of instances and ids.
+
+```python
+input = (instances, ids)
+
+output = model(input)
+```
+
 
 ### Bag of bags
 
@@ -138,8 +155,20 @@ model = torch.nn.Sequential(
     )
 ```
 
-### 3d data representation
+### 3D data representation
 If using data in form of "bag of instances" (the simplest case), it's possible to use **mil.BagModel_3d** and **mil.MilDataset_3d** instead of the ones used above. In some cases, this can lead to speed up of forward function of the model. This method is however more memory consuming, especially, if the variability of number of instances in bags is high. If using this method, there is no need to use custom collate function for creating dataloaders due to different type of data representation.
+
+The input of BagModel\_3d must be a tuple of instances and n\_instances, where instances is 3D tensor with each slice being one bag. n\_instances specifies number of valid instances in each slice (bag). 
+
+Module mil.MilDataset_3d takes care of this representation.
+
+```python
+dataset = mil.MilDataset_3d(instances, ids, labels)
+model = mil.BagModel_3d(prepNN, afterNN, torch.mean)
+
+instances, n_instances, labels = dataset[index]
+output = model((instances, n_instances))
+```
 
 ### Warning
 
