@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="mil-pytorch",
+    name="mil_pytorch",
     version="0.0.1",
     author="Jakub Monhart",
     author_email="monhajak@fel.cvut.cz",
