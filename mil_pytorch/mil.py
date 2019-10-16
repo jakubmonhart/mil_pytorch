@@ -15,25 +15,29 @@ class BagModel(nn.Module):
         prepNN: neural network created by user processing input before aggregation function (subclass of torch.nn.Module)
         afterNN: neural network created by user processing output of aggregation function and outputing final output of BagModel (subclass of torch.nn.Module)
         aggregation_func: mil.max and mil.mean supported, any aggregation function with argument 'dim' and same behaviour as torch.mean can be used
-        device: use 'cuda' when using gpu for forward to move created tensors to gpu.
-            Default: 'cpu'
 
     Returns:
         Output of forward function.
     '''
 
-    def __init__(self, prepNN, afterNN, aggregation_func, device = 'cpu'):
+    def __init__(self, prepNN, afterNN, aggregation_func):
         super().__init__()
 
         self.prepNN = prepNN
         self.aggregation_func = aggregation_func
         self.afterNN = afterNN
-        self.device = device
     
     def forward(self, input):    
         ids = input[1]
         input = input[0]
+
+        # Modify shape of bagids if only 1d tensor
+        if (len(ids.shape) == 1):
+            ids.resize_(1, len(ids))
+
         inner_ids = ids[len(ids)-1]
+
+        device = input.device
 
         NN_out = self.prepNN(input)
             
@@ -42,8 +46,8 @@ class BagModel(nn.Module):
         bags = unique[idx]
         counts = counts[idx]
 
-        output = torch.empty((len(bags), len(NN_out[0])), device = self.device)
- 
+        output = torch.empty((len(bags), len(NN_out[0])), device = device)
+
         for i, bag in enumerate(bags):
             output[i] = self.aggregation_func(NN_out[inner_ids == bag], dim = 0)
         
@@ -53,7 +57,7 @@ class BagModel(nn.Module):
             return output
         else:
             ids = ids[:len(ids)-1]
-            mask = torch.empty(0, device = self.device).long()
+            mask = torch.empty(0, device = device).long()
             for i in range(len(counts)):
                 mask = torch.cat((mask, torch.sum(counts[:i], dtype = torch.int64).reshape(1)))
             return (output, ids[:,mask])
@@ -69,8 +73,6 @@ class BagModel_3d(nn.Module):
         prepNN: neural network created by user processing input before aggregation function (subclass of torch.nn.Module)
         afterNN: neural network created by user processing output of aggregation function and outputing final output of BagModel (subclass of torch.nn.Module)
         aggregation_func: mil.max and mil.mean supported, any aggregation function with argument 'dim' and same behaviour as torch.mean can be used
-        device: use 'cuda' when using gpu for forward to move created tensors to gpu.
-            Default: 'cpu'
 
     Returns:
         Output of forward function.
@@ -81,15 +83,16 @@ class BagModel_3d(nn.Module):
         self.prepNN = prepNN
         self.afterNN = afterNN
         self.aggregation_func = aggregation_func
-        self.device = device
 
     def forward(self, input):
         n_instances = input[1]
         input = input[0]
 
+        device = input.device
+
         NN_out = self.prepNN(input)
 
-        output = torch.empty(size = (input.size(0), NN_out.size(2)), dtype = torch.double).to(self.device)
+        output = torch.empty(size = (input.size(0), NN_out.size(2)), dtype = torch.double).to(device)
 
         for i, n in enumerate(n_instances):
             output[i] = self.aggregation_func(NN_out[i, :n], dim = 0)
