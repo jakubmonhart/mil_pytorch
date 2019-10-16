@@ -9,8 +9,17 @@ from mil_pytorch.utils import data_utils
 
 class BagModel(nn.Module):
     '''
-    BagModel used with data represented as sequence of instances along with array specifiing number of instances
-    Accepts data tensor and n_instances array
+    Model for solving MIL problems
+
+    Args:
+        prepNN: neural network created by user processing input before aggregation function (subclass of torch.nn.Module)
+        afterNN: neural network created by user processing output of aggregation function and outputing final output of BagModel (subclass of torch.nn.Module)
+        aggregation_func: mil.max and mil.mean supported, any aggregation function with argument 'dim' and same behaviour as torch.mean can be used
+        device: use 'cuda' when using gpu for forward to move created tensors to gpu.
+            Default: 'cpu'
+
+    Returns:
+        Output of forward function.
     '''
 
     def __init__(self, prepNN, afterNN, aggregation_func, device = 'cpu'):
@@ -26,16 +35,13 @@ class BagModel(nn.Module):
         input = input[0]
         inner_ids = ids[len(ids)-1]
 
-        NN_out = self.prepNN(input) # Forward all instances through neural network
+        NN_out = self.prepNN(input)
             
-        # Numpy version of this segment is faster on CPU (cca 2x - 3x faster .. the differenec is more significatn for longer arrays)
         unique, inverse, counts = torch.unique(inner_ids, sorted = True, return_inverse = True, return_counts = True)
         idx = torch.cat([(inverse == x).nonzero()[0] for x in range(len(unique))]).sort()[1]
         bags = unique[idx]
         counts = counts[idx]
 
-        # Allocate memory for output
-        # print('DEBUG: bags: {} NN_out[0]: {}'.format(bags, NN_out[0]))
         output = torch.empty((len(bags), len(NN_out[0])), device = self.device)
  
         for i, bag in enumerate(bags):
@@ -56,8 +62,18 @@ class BagModel(nn.Module):
 
 class BagModel_3d(nn.Module):
     '''
-    BagModel_3d - not scalable, used with data represented in 3d
-    Accepts 3d data tensor and n_instances array
+    Model for solving MIL problems.
+    Represents MIL data with variable number of instances in bag with 3d tensor with fixed dimensions and n_instances tensor specifying valid instances in each bag (slice) of this 3d tensor.
+
+    Args:
+        prepNN: neural network created by user processing input before aggregation function (subclass of torch.nn.Module)
+        afterNN: neural network created by user processing output of aggregation function and outputing final output of BagModel (subclass of torch.nn.Module)
+        aggregation_func: mil.max and mil.mean supported, any aggregation function with argument 'dim' and same behaviour as torch.mean can be used
+        device: use 'cuda' when using gpu for forward to move created tensors to gpu.
+            Default: 'cpu'
+
+    Returns:
+        Output of forward function.
     '''
     def __init__(self, prepNN, afterNN, aggregation_func, device = 'cpu'):
         super().__init__()
@@ -71,12 +87,12 @@ class BagModel_3d(nn.Module):
         n_instances = input[1]
         input = input[0]
 
-        NN_out = self.prepNN(input) # Forward all indices through neural network
+        NN_out = self.prepNN(input)
 
-        output = torch.empty(size = (input.size(0), NN_out.size(2)), dtype = torch.double).to(self.device) # Pre-alocate tensor for output
+        output = torch.empty(size = (input.size(0), NN_out.size(2)), dtype = torch.double).to(self.device)
 
         for i, n in enumerate(n_instances):
-            output[i] = self.aggregation_func(NN_out[i, :n], dim = 0) # Aggregates only valid instances
+            output[i] = self.aggregation_func(NN_out[i, :n], dim = 0)
 
         output = self.afterNN(output)
 
@@ -103,7 +119,13 @@ class MyHingeLoss(torch.nn.Module):
 
 class MilDataset(Dataset):
     '''
+    Subclass of torch.utils.data.Dataset. 
 
+    Args:
+        data:
+        ids:
+        labels:
+        normalize:
     '''
     def __init__(self, data, ids, labels, normalize = True):
         self.data = data
@@ -127,14 +149,11 @@ class MilDataset(Dataset):
             std = self.data.std(dim = 0)
             mean = self.data.mean(dim = 0)
             self.data = (self.data - mean)/std
-            # print('INFO: data normalized')
 
     def __len__(self):
         return self.n_bags
     
     def __getitem__(self, index):
-        # item = self.data[self.ids[0] == index]
-
         item = self.data[self.ids[0] == self.bags[index]]
 
         return item, self.ids[:, self.ids[0] == self.bags[index]], self.labels[index]
@@ -179,7 +198,7 @@ class MilDataset_3d(Dataset):
 
 def collate(batch):
     '''
-    Convert to pytorch
+
     '''
     batch_data = []
     batch_bagids = []
@@ -193,8 +212,6 @@ def collate(batch):
     out_data = torch.cat(batch_data, dim = 0)
     out_bagids = torch.cat(batch_bagids, dim = 1)
     out_labels = torch.stack(batch_labels)
-    # print('DEBUG: batch_labels: {} out_labels: {}'.format(batch_labels, out_labels))
-    
     
     return out_data, out_bagids, out_labels
 
@@ -219,7 +236,6 @@ def collate_np(batch):
     
     
     return out_data, out_bagids, out_labels
-
 
 
 def max(input, dim):

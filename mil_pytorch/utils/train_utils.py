@@ -118,7 +118,6 @@ def k_fold_cv(model, fit_fn, criterion, optimizer, dataset, train_indices, epoch
         cv_train_indices = numpy.concatenate((train_indices[:start], train_indices[stop:]))
         current = stop
 
-        # Use subsetrandomsampler as sampler .. instead of shuffle, thanks to it, you will use only one dataset
         cv_train_sampler = SubsetRandomSampler(indices = cv_train_indices)
         cv_valid_sampler = SubsetRandomSampler(indices = cv_valid_indices)
 

@@ -10,12 +10,9 @@ def create_3d_data(instances, n_instances):
     n_bags = len(n_instances)
     n_features = instances.shape[1]
     instances = instances.float()
-    # Pre-allocate empty 3d tensor
-    data = torch.empty(size = (n_bags, max_n_instances, n_features), dtype = torch.double)
-    # data = torch.Tensor(n_bags, max_n_instances, n_features)
-    
-    # n_instances = n_instances.float()
 
+    data = torch.empty(size = (n_bags, max_n_instances, n_features), dtype = torch.double)
+    
     # Fill data tensor
     marker = 0
     for i in range(n_bags):
@@ -97,7 +94,6 @@ def create_bag_labels(instance_labels, bagids):
 
     n_bags = len(bags)
 
-    # Allocate memory for bag labels
     bag_labels = torch.empty(n_bags, dtype = torch.long)
 
     for i, bag in enumerate(bags):

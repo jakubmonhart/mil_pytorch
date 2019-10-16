@@ -1,7 +1,6 @@
 import mil_pytorch.mil as mil
 from mil_pytorch.utils import eval_utils, data_utils, train_utils, create_bags_simple
 
-
 import numpy
 import torch
 from torch.utils.data import DataLoader, SubsetRandomSampler

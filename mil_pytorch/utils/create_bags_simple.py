@@ -6,18 +6,14 @@ def create_bags(data, instance_labels, pos = 100, neg = 100, max_instances = 7):
    instance_labels = np.array(instance_labels)
    labels = np.empty(0)
    instances = np.empty(shape = (0, len(data[0])))
-   # subbag_id = 0
    instance_id = 0
-   # subbag_ids = np.empty(0)
    instance_ids = np.empty(0)
 
    while pos+neg > 0:
       # Create top bag
       temp_instances = np.empty(shape = (0, len(data[0])))
       is_positive = False
-      # n_subbags = np.random.randint(low = 2, high = max_subbags+1)
       temp_instance_id = instance_id
-      # temp_subbag_ids = np.empty(0)
       temp_instance_ids = np.empty(0)
 
       # Choose random labels
@@ -36,15 +32,12 @@ def create_bags(data, instance_labels, pos = 100, neg = 100, max_instances = 7):
 
       # Create ids
       temp_instance_ids = np.concatenate((temp_instance_ids, [temp_instance_id]*n_instances), axis = 0)
-      # temp_subbag_ids = np.concatenate((temp_subbag_ids, [subbag_id]*n_instances), axis = 0)
       temp_instance_id += 1
 
       # Decide, if there is enough of positive or negative top bags
       if (is_positive and pos > 0) or (not is_positive and neg > 0):
          instances = np.concatenate((instances, temp_instances), axis = 0)
          instance_ids = np.concatenate((instance_ids, temp_instance_ids), axis = 0)
-         # subbag_ids = np.concatenate((subbag_ids, temp_subbag_ids), axis = 0)
-         # subbag_id += 1
          instance_id = temp_instance_id
 
          if is_positive:
