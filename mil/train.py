@@ -44,7 +44,7 @@ def eval_model(model, dataloader):
             pred_probs.append(pred.detach().item())
             train_acc.append(pred.round().detach().item() ==labels.item())
 
-    return train_acc, pred_probs
+    return sum(train_acc)/len(train_acc), pred_probs
     
 
 

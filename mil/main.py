@@ -2,7 +2,7 @@
 
 from mil.utils import get_raw_train_test_data
 from mil.dataloader import get_train_test_dataloader
-from mil.nn.models import MI_NET, mi_NET, MI_NET_RC, MI_NET_Attention
+from mil.nn.models import MI_Net, mi_Net, MI_Net_RC, MI_Net_Attention
 from mil.train import train, eval_model
 
 
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     train_dl, test_dl = get_train_test_dataloader(train_data=train_data, test_data=test_data, train_batch_size=batch_size, 
         test_batch_size=batch_size)
 
-    model = MI_NET()  # build the model
+    model = MI_Net()  # build the model
     model = train(model=model, train_dl=train_dl)
     train_acc, train_pred_prob = eval_model(model=model, )
     

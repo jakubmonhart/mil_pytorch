@@ -111,3 +111,43 @@ class MI_Net_RC(nn.Module):
         x = self.fc4(x)
 
         return torch.sigmoid(x)
+
+class MI_Net_Attention(nn.Module):
+    def __init__(self, input_dim=166, bias=True, dropout=True):
+        super().__init__()
+
+        self.fc1 = nn.Linear(in_features=input_dim, out_features=256)
+        self.fc2 = nn.Linear(in_features=256, out_features=128)
+        self.fc3 = nn.Linear(in_features=128, out_features=64)
+        self.dropout = dropout
+        if dropout:
+            self.dropout_1 = nn.Dropout(p=0.5, inplace=False)
+            self.dropout_2 = nn.Dropout(p=0.5, inplace=False)
+            self.dropout_3 = nn.Dropout(p=0.5, inplace=False)
+        
+        self.V = nn.Linear(in_features=64, out_features=64, bias=bias) # The 
+        self.w = nn.Linear(in_features=64, out_features=1, bias=bias)
+        self.fc4 = nn.Linear(in_features=64, out_features=1)
+    
+    def forward(self, input):    
+        
+        x = input.float()
+        x = F.relu(self.fc1(x))
+        if self.dropout:
+            x = self.dropout_1(x)
+        
+        x = F.relu(self.fc2(x))
+        if self.dropout:
+            x = self.dropout_2(x)
+        
+        x = F.relu(self.fc3(x))
+        if self.dropout:
+            x = self.dropout_3(x)
+        
+        A = torch.tanh(self.V(x))  # NxK
+        A = self.w(x)
+        A = F.softmax(A, dim=1)  # softmax over N
+        x = torch.bmm(A.transpose(1, 2), x)
+        x = self.fc4(x).squeeze(-1)
+
+        return torch.sigmoid(x)
