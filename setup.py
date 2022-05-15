@@ -12,8 +12,8 @@ from codecs import open
 from os import path
 
 name = "mil"
-version = "0.1"
-release = "0.0.1"
+version = "0.2"
+release = "0.1.0"
 description = "Multiple Instance Learning"
 author = "Nima"
 author_email = "nima.manaf8@gmail.com"

@@ -1,2 +1,4 @@
 numpy 
 torch
+scikit-learn
+pandas
