@@ -1,8 +1,8 @@
 # Pytorch implementation of multiple instance learning model with and without attention
 
 This repository implements different neural network based approches for Multiple instance learning problem presented in the following papers:
-[Revisiting Multiple Instance Neural Networks](https://arxiv.org/pdf/1610.02501v1.pdf)
-[Attention-based Deep Multiple Instance Learning](https://arxiv.org/pdf/1802.04712v4.pdf)
+- [Revisiting Multiple Instance Neural Networks](https://arxiv.org/pdf/1610.02501v1.pdf)
+- [Attention-based Deep Multiple Instance Learning](https://arxiv.org/pdf/1802.04712v4.pdf)
 ## Installation
 
 In the project repository run the following:
