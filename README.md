@@ -26,7 +26,7 @@ instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
 			  [3.0, 3.0, 3.0, 3.0],
 			  [4.0, 4.0, 4.0, 4.0]])
 ids = torch.tensor([0, 0, 0, 1])
-labels = torch.tensor([1, 0])
+labels = torch.tensor([1.0, 0.0])
 
 # Initialize MilDataset using created data
 dataset = mil.MilDataset(instances, ids, labels)
