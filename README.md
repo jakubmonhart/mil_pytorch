@@ -1,5 +1,5 @@
 # mil_pytorch - multiple instance learning model implemented in pytorch
-This library consists mainly of **mil_pytorch.mil.BagModel** and **mil_pytorch.mil.MilDataset**
+This library consists mainly of **mil.BagModel** and **mil.MilDataset**
 
 ```python
 from mil_pytorch.mil import BagModel, MilDataset
