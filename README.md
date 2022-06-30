@@ -10,13 +10,6 @@ from mil_pytorch.mil import BagModel, MilDataset
 
 For description of multiple instance learning problem see https://github.com/pevnak/Mill.jl#what-is-multiple-instance-learning-mil-problem.
 
-## Install
-Clone this repository. Inside it, use:
-
-```python
-python setup.py install
-```
-
 ## Usage
 ### Data
 Each instance is feature vector with fixed length. A bag contains variable number of these instances. Each instance has an id specifying, which bag does it belong to. Ids of instances are stored in vector with length equal to number of instances.
@@ -31,9 +24,9 @@ import mil_pytorch.mil as mil
 instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
 			  [2.0, 2.0, 2.0, 2.0],
 			  [3.0, 3.0, 3.0, 3.0],
-			  [4.0, 4.0, 4.0, 4.0]], dtype = torch.double)
-ids = torch.tensor([0, 0, 0, 1], dtype = torch.long)
-labels = torch.tensor([1, -1], dtype = torch.long)
+			  [4.0, 4.0, 4.0, 4.0]])
+ids = torch.tensor([0, 0, 0, 1])
+labels = torch.tensor([1, 0])
 
 # Initialize MilDataset using created data
 dataset = mil.MilDataset(instances, ids, labels)
@@ -48,7 +41,7 @@ instances, ids, label = dataset[index]
 ... or iteration.
 
 ```python
-for instances, ids, bag in dataset:
+for data, bagids, labels in dataset:
   ...
 ```
 
@@ -56,9 +49,9 @@ To use **torch.utils.data.DataLoader** (https://pytorch.org/docs/stable/data.htm
 
 ```python
 from torch.utils.data import DataLoader
-import mil_pytorch.mil as mil
+import mil
 
-dataloader = DataLoader(dataset = dataset, batch_size = batch_size, collate_fn = mil.collate)
+dataloader = DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=mil.collate)
 ```
 
 ### Creating model
@@ -68,14 +61,13 @@ PrepNN preserves number of feature vectors (instances) in input, aggregation fun
 ```python
 # Define custom prepNN
 prepNN = torch.nn.Sequential(
-        torch.nn.Linear(input_len, 10, bias = True),
+        torch.nn.Linear(input_len, 10),
         torch.nn.ReLU(),
     )
    
 # Define custom afterNN
 afterNN = torch.nn.Sequential(
-        torch.nn.Linear(10, 1, bias = True),
-        torch.nn.Tanh(),
+        torch.nn.Linear(10, 1)
     )
 
 # Define model with prepNN, afterNN and torch.mean as aggregation function
@@ -86,7 +78,7 @@ model = mil.BagModel(prepNN, afterNN, torch.mean)
 Input for model must be a tuple of instances and ids.
 
 ```python
-input = (instances, ids)
+input = (instances, bagids)
 
 output = model(input)
 ```
@@ -102,7 +94,7 @@ Data for bag of bags problem would look like this:
 
 ```python
 import torch
-import mil_pytorch.mil as mil
+import mil
 
 # Create 8 instances divided to 4 lower-bags in 1:3:2:2 ratio. Lower-bags are divided into 2 bags in ratio 2:2 First bag has positive label, second bag has negative label
 instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
@@ -112,12 +104,12 @@ instances = torch.tensor([[1.0, 1.0, 1.0, 1.0],
 			  [5.0, 5.0, 5.0, 5.0],
 			  [6.0, 6.0, 6.0, 6.0],
 			  [7.0, 7.0, 7.0, 7.0],
-			  [8.0, 8.0, 8.0, 8.0]], dtype = torch.double)
+			  [8.0, 8.0, 8.0, 8.0]])
 						  
 ids = torch.tensor([[0, 0, 0, 0, 1, 1, 1, 1],
-		    [0, 1, 1, 1, 2, 2, 3, 3]], dtype = torch.long)
+		    [0, 1, 1, 1, 2, 2, 3, 3]])
 					
-labels = torch.tensor([1, -1], dtype = torch.long)
+labels = torch.tensor([1.0, 0.0])
 
 # Initialize MilDataset using created data
 dataset = mil.MilDataset(instances, ids, labels)
@@ -130,7 +122,7 @@ In the case of "bag of bags" problem, the neural network is created as sequence 
 ```python
 # Define prepNNs and afterNNs
 prepNN1 = torch.nn.Sequential(
-        torch.nn.Linear(input_len, 10, bias = True),
+        torch.nn.Linear(input_len, 10),
         torch.nn.ReLU(),
     )
    
@@ -139,12 +131,12 @@ afterNN1 = torch.nn.Sequential(
     )
 
 prepNN2 = torch.nn.Sequential(
-        torch.nn.Linear(5, 3, bias = True),
+        torch.nn.Linear(5, 3),
         torch.nn.ReLU()
     )
 
 afterNN2 = torch.nn.Sequential(
-        torch.nn.Linear(3, 1, bias = True),
+        torch.nn.Linear(3, 1),
         torch.nn.Tanh()
     )
 
@@ -155,42 +147,7 @@ model = torch.nn.Sequential(
     )
 ```
 
-### 3D data representation
-If using data in form of "bag of instances" (the simplest case), it's possible to use **mil.BagModel_3d** and **mil.MilDataset_3d** instead of the ones used above. In some cases, this can lead to speed up of forward function of the model. This method is however more memory consuming, especially, if the variability of number of instances in bags is high. If using this method, there is no need to use custom collate function for creating dataloaders due to different type of data representation.
-
-The input of BagModel\_3d must be a tuple of instances and n\_instances, where instances is 3D tensor with each slice being one bag. n\_instances specifies number of valid instances in each slice (bag). 
-
-Module mil.MilDataset_3d takes care of this representation.
-
-```python
-dataset = mil.MilDataset_3d(instances, ids, labels)
-model = mil.BagModel_3d(prepNN, afterNN, torch.mean)
-
-instances, n_instances, labels = dataset[index]
-output = model((instances, n_instances))
-```
-
-### Warning
-
-Neural network created using this library has to consists only of instances of BagModel. It is not possible to combine **mil.BagModel** with other **torch.nn** modules due to correct pass of information about ids. However, preNN and afterNN neural networks can be of arbitrary form as long as the length of output of prepNN matches the length of input of afterNN.
-
-```python
-# --- WRONG ---
-model = torch.nn.Sequential(
-     torch.nn.Linear(10, 10, bias = True),
-     mil.BagModel(prepNN, afterNN, torch.mean),
-     torch.nn.Linear(10, 1, bias = True)
-     )
-# --- WRONG ---
-```
-
 ## Examples
-[musk1](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk1.ipynb)
+[musk](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk.py)
 
-[musk2](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk2.ipynb)
-
-[musk1 with 3d data representation](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk1_3d.ipynb)
-
-[musk2 with 3d data representation](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/musk/example_musk2_3d.ipynb)
-
-[bag\_of\_bags](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/bag_of_bags/bag_of_bags.ipynb)
+[bag\_of\_bags](https://github.com/jakubmonhart/mil_pytorch/blob/master/examples/bag_of_bags.py)
